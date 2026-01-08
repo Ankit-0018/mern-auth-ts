@@ -5,6 +5,7 @@ import connectDB from './config/db';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import errorHandler from './middlewares/errorHandler';
+import { OK } from './constants/http';
 
 
 const app = express();
@@ -20,7 +21,7 @@ app.use(cors(
 app.use(cookieParser());
 
 app.get('/', (req , res) => {
-    res.status(200).json({
+    res.status(OK).json({
         status : "healthy"
     })
 })
