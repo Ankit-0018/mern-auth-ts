@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import catchErros from "../utils/catchErrors";
 import z from "zod";
-import { OK } from "../constants/http";
+import { CREATED, OK } from "../constants/http";
+import { createAccount } from "../services/auth.service";
+import setAuthCookies from "../utils/cookies";
 
 const registerSchema = z.object({
   email: z.string().email().min(5).max(255),
@@ -23,10 +25,8 @@ export const registerHandler = catchErros(
             userAgent: req.headers["user-agent"]
 
         })
-
-        res.status(OK).json({
-          message : "success parsing",
-          request
-        })
+        const {user , accessToken , refreshToken} = await createAccount(request);
+        
+        return setAuthCookies({res , accessToken , refreshToken}).status(CREATED).json(user);
     }
 )
