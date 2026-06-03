@@ -8,3 +8,15 @@ export const CONFLICT = 409;
 export const UNPROCESSABLE_CONTENT = 422;
 export const INTERNAL_SERVER_ERROR = 500;
 export const TOO_MANY_REQUESTS = 429;
+
+export type HttpStatusCode =
+  | typeof OK
+  | typeof CREATED
+  | typeof BAD_REQUEST
+  | typeof UNAUTHORIZED
+  | typeof FORBIDDEN
+  | typeof NOT_FOUND
+  | typeof CONFLICT
+  | typeof UNPROCESSABLE_CONTENT
+  | typeof INTERNAL_SERVER_ERROR
+  | typeof TOO_MANY_REQUESTS;
