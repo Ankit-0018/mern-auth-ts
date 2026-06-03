@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import { CREATED, OK } from "../constants/http";
 import { createAccount, loginUser } from "../services/auth.service";
-import setAuthCookies from "../utils/cookies";
+import { setAuthCookies, clearAuthCookies } from "../utils/cookies";
 import { registerSchema, loginSchema } from "./auth.schema";
+import { verifyToken } from "../utils/jwt";
+import sessionModel from "../models/session.model";
 
 export const registerHandler = async (req: Request, res: Response) => {
   const request = registerSchema.parse({
@@ -26,4 +28,16 @@ export const loginHandler = async (req: Request, res: Response) => {
   return setAuthCookies({ res, accessToken, refreshToken })
     .status(OK)
     .json({ message: "Login successful" });
+};
+
+export const logoutHandler = async (req: Request, res: Response) => {
+  const accessToken = req.cookies.accessToken;
+  const { payload } = verifyToken(accessToken);
+  if (payload) {
+    await sessionModel.findByIdAndDelete(payload.sessionId);
+  }
+
+  return clearAuthCookies(res)
+    .status(OK)
+    .json({ message: "Logout successful" });
 };
