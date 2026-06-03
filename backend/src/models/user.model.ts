@@ -2,33 +2,43 @@ import mongoose from "mongoose";
 import { comparePassword, hashPassword } from "../utils/bcrypt";
 
 export interface UserDocument extends mongoose.Document {
-    email : string;
-    password : string;
-    verified : boolean;
-    createdAt : Date;
-    updatedAt : Date;
-    comparePassword(val:string): Promise<boolean>;
+  email: string;
+  password: string;
+  verified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  omitPassword(): Omit<UserDocument, "password">;
+  comparePassword(val: string): Promise<boolean>;
 }
 
-const userSchema = new mongoose.Schema<UserDocument>({
-    email : {type : String , required : true},
-    password : {type : String , required : true},
-    verified : {type : Boolean , default : false}
-}, {
-    timestamps : true
-})
+const userSchema = new mongoose.Schema<UserDocument>(
+  {
+    email: { type: String, required: true },
+    password: { type: String, required: true },
+    verified: { type: Boolean, default: false },
+  },
+  {
+    timestamps: true,
+  },
+);
 
-userSchema.pre("save" , async function (){
-    if (!this.isModified("password")){
-        return;
-    }
-    this.password = await hashPassword(this.password , 8);
-})
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) {
+    return;
+  }
+  this.password = await hashPassword(this.password, 8);
+});
 
-userSchema.methods.comparePassword = async function (value : string){
-   return await comparePassword(value , this.password)
-} 
+userSchema.methods.comparePassword = async function (value: string) {
+  return await comparePassword(value, this.password);
+};
 
-const UserModel = mongoose.model<UserDocument>("User" , userSchema);
+userSchema.methods.omitPassword = function () {
+  const obj = this.toObject();
+  delete obj.password;
+  return obj;
+};
+
+const UserModel = mongoose.model<UserDocument>("User", userSchema);
 
 export default UserModel;
