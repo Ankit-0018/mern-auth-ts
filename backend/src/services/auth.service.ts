@@ -6,7 +6,8 @@ import UserModel from "../models/user.model";
 import verificationCodeModel from "../models/verificationCode.model";
 import { oneYearFromNow } from "../utils/date";
 import appAssert from "../utils/appAssert";
-import { CONFLICT } from "../constants/http";
+import { CONFLICT, UNAUTHORIZED } from "../constants/http";
+import { signToken, refreshTokenSignOptions } from "../utils/jwt";
 
 export type createAccountParams = {
   email: string;
@@ -35,29 +36,57 @@ export const createAccount = async (data: createAccountParams) => {
     userId: user._id,
     userAgent: data.userAgent ?? "unknown",
   });
+  const userId = user._id;
+  const sessionInfo = {
+    sessionId: session._id,
+  };
 
-  const refreshToken = jwt.sign(
-    {
-      sessionId: session._id,
-    },
-    JWT_REFRESH_SECRET,
-    {
-      expiresIn: "30d",
-      audience: ["user"],
-    },
-  );
+  const refreshToken = signToken(sessionInfo, refreshTokenSignOptions);
 
-  const accessToken = jwt.sign(
-    {
-      userId: user._id,
-      sessionId: session._id,
-    },
-    JWT_SECRET,
-    {
-      expiresIn: "15m",
-      audience: ["user"],
-    },
-  );
-
+  const accessToken = signToken({
+    ...sessionInfo,
+    userId,
+  });
   return { user: user.omitPassword(), refreshToken, accessToken };
+};
+
+export type loginParams = {
+  email: string;
+  password: string;
+  userAgent?: string;
+};
+
+export const loginUser = async ({
+  email,
+  password,
+  userAgent,
+}: loginParams) => {
+  const user = await UserModel.findOne({ email });
+  appAssert(user, UNAUTHORIZED, "Invalid email or password");
+
+  const isValid = await user.comparePassword(password);
+  appAssert(isValid, UNAUTHORIZED, "Invalid email or password");
+
+  const userId = user._id;
+
+  const session = await sessionModel.create({
+    userId,
+    userAgent: userAgent ?? "unknown",
+  });
+
+  const sessionInfo = {
+    sessionId: session._id,
+  };
+
+  const refreshToken = signToken(sessionInfo, refreshTokenSignOptions);
+
+  const accessToken = signToken({
+    ...sessionInfo,
+    userId,
+  });
+  return {
+    user: user.omitPassword(),
+    refreshToken,
+    accessToken,
+  };
 };
