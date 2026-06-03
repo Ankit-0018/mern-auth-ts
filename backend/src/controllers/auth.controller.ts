@@ -1,10 +1,15 @@
 import { Request, Response } from "express";
-import { CREATED, OK } from "../constants/http";
-import { createAccount, loginUser } from "../services/auth.service";
+import { CREATED, OK, UNAUTHORIZED } from "../constants/http";
+import {
+  createAccount,
+  loginUser,
+  refreshUserAccessToken,
+} from "../services/auth.service";
 import { setAuthCookies, clearAuthCookies } from "../utils/cookies";
 import { registerSchema, loginSchema } from "./auth.schema";
 import { verifyToken } from "../utils/jwt";
 import sessionModel from "../models/session.model";
+import appAssert from "../utils/appAssert";
 
 export const registerHandler = async (req: Request, res: Response) => {
   const request = registerSchema.parse({
@@ -40,4 +45,15 @@ export const logoutHandler = async (req: Request, res: Response) => {
   return clearAuthCookies(res)
     .status(OK)
     .json({ message: "Logout successful" });
+};
+
+export const refreshHandler = async (req: Request, res: Response) => {
+  const refreshToken = req.cookies.refreshToken as string | undefined;
+  appAssert(refreshToken, UNAUTHORIZED, "Refresh token not found");
+
+  const { accessToken, refreshToken: newRefreshToken } =
+    await refreshUserAccessToken(refreshToken);
+  return setAuthCookies({ res, accessToken, refreshToken: newRefreshToken })
+    .status(OK)
+    .json({ message: "Access Token refreshed successfully" });
 };
