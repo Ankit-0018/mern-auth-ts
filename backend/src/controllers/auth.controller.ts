@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { CREATED, OK, UNAUTHORIZED } from "../constants/http";
 import {
   createAccount,
+  creatNewPasword,
   loginUser,
   refreshUserAccessToken,
   sendPasswordResetEmail,
@@ -12,6 +13,7 @@ import {
   registerSchema,
   loginSchema,
   emailSchema,
+  passwordResetSchema,
   verificationCodeSchema,
 } from "./auth.schema";
 import { verifyToken } from "../utils/jwt";
@@ -84,4 +86,14 @@ export const sendPasswordResetEmailHandler = async (
   return res
     .status(OK)
     .json({ message: "Password reset email sent successfully" });
+};
+
+export const resetPasswordHandler = async (req: Request, res: Response) => {
+  const { password, verificationCode } = passwordResetSchema.parse(req.body);
+
+  await creatNewPasword(password, verificationCode);
+
+  return clearAuthCookies(res).status(OK).json({
+    message: "Password reset successfully.",
+  });
 };
