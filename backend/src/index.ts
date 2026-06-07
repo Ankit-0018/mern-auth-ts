@@ -7,8 +7,9 @@ import cors from "cors";
 import errorHandler from "./middlewares/errorHandler";
 import { OK } from "./constants/http";
 import authRoutes from "./routes/auth.route";
-import userRouter from "./routes/user.route";
+import userRoutes from "./routes/user.route";
 import { authenticate } from "./middlewares/authenticate";
+import sessionRoutes from "./routes/session.route";
 
 const app = express();
 
@@ -29,8 +30,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRoutes);
-app.use("/user", authenticate, userRouter);
-
+app.use("/user", authenticate, userRoutes);
+app.use("/sessions", authenticate, sessionRoutes);
 app.use(errorHandler);
 
 app.listen(PORT, async () => {
