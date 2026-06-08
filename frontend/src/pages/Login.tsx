@@ -13,6 +13,9 @@ import {
   FieldLabel,
   FieldError,
 } from "@/components/ui/field";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { api } from "@/lib/axios";
 
 export default function LoginPage() {
   const {
@@ -28,7 +31,19 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    console.log(data);
+    try {
+      await api.post("/auth/login", {
+        email: data.email,
+        password: data.password,
+      });
+      toast.success("Login Successfully.");
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : "Something went wrong";
+
+      toast.error(message);
+    }
   };
 
   return (

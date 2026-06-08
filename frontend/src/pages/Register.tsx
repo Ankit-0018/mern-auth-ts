@@ -5,16 +5,17 @@ import {
   registerSchema,
   type RegisterFormData,
 } from "@/lib/schemas/register.schema";
-
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
+import { toast } from "react-hot-toast";
 import {
   Field,
   FieldContent,
   FieldLabel,
   FieldError,
 } from "@/components/ui/field";
+import { api } from "@/lib/axios";
 
 export default function RegisterPage() {
   const {
@@ -31,7 +32,20 @@ export default function RegisterPage() {
   });
 
   const onSubmit = async (data: RegisterFormData) => {
-    console.log(data);
+    try {
+      await api.post("/auth/register", {
+        email: data.email,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+      });
+      toast.success("Register done.");
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : "Something went wrong";
+
+      toast.error(message);
+    }
   };
 
   return (
