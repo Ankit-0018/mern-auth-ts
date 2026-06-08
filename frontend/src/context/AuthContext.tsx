@@ -9,8 +9,9 @@ import {
 import { api } from "@/lib/axios";
 
 type User = {
-  id: string;
+  _id: string;
   email: string;
+  verified: boolean;
 };
 
 type AuthContextType = {

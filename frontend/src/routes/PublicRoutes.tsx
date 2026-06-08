@@ -1,15 +1,19 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
 export default function PublicRoute() {
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
+  const location = useLocation();
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const allowedPaths = ["/password/reset"];
 
-  if (user) {
-    return <Navigate to="/home" replace />;
+  const isVerificationPage = location.pathname.startsWith("/email/verify/");
+
+  const isAllowedPage =
+    allowedPaths.includes(location.pathname) || isVerificationPage;
+
+  if (user && !isAllowedPage) {
+    return <Navigate to="/" replace />;
   }
 
   return <Outlet />;

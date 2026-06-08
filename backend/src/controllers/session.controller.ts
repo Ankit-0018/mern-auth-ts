@@ -33,9 +33,9 @@ export const getSessionsHandler: RequestHandler = async (req, res) => {
   return res.status(OK).json(sessionObj);
 };
 
-export const deleteSessionHandler: RequestHandler = (req, res) => {
+export const deleteSessionHandler: RequestHandler = async (req, res) => {
   const sessionId = z.string().parse(req.params.id);
-  const deleted = sessionModel.findOneAndDelete({
+  const deleted = await sessionModel.findOneAndDelete({
     _id: sessionId,
     userId: req.userId,
   });
