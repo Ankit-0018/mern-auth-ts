@@ -29,7 +29,7 @@ export const registerHandler = async (req: Request, res: Response) => {
 
   return setAuthCookies({ res, accessToken, refreshToken })
     .status(CREATED)
-    .json(user);
+    .json({ user });
 };
 
 export const loginHandler = async (req: Request, res: Response) => {
@@ -38,10 +38,10 @@ export const loginHandler = async (req: Request, res: Response) => {
     userAgent: req.headers["user-agent"],
   });
 
-  const { accessToken, refreshToken } = await loginUser(request);
+  const { accessToken, refreshToken, user } = await loginUser(request);
   return setAuthCookies({ res, accessToken, refreshToken })
     .status(OK)
-    .json({ message: "Login successful" });
+    .json({ message: "Login successful", user });
 };
 
 export const logoutHandler = async (req: Request, res: Response) => {

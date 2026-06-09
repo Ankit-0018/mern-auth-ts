@@ -3,39 +3,20 @@ import { useAuth } from "@/context/AuthContext";
 
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/axios";
-import { useState } from "react";
+
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
-  const [sendingVerification, setSendingVerification] = useState(false);
-  const [verificationMessage, setVerificationMessage] = useState("");
 
   const handleLogout = async () => {
     try {
       await api.get("/auth/logout");
-      navigate("/login");
+      setUser(null);
+
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error(error);
-    }
-  };
-  const handleResendVerification = async () => {
-    try {
-      setSendingVerification(true);
-      setVerificationMessage("");
-
-      const { data } = await api.post("/auth/email/verify");
-
-      setVerificationMessage(
-        data.message || "Verification email sent successfully.",
-      );
-    } catch (error: any) {
-      setVerificationMessage(
-        error?.response?.data?.message ||
-          "Verification email already sent. Please check your inbox.",
-      );
-    } finally {
-      setSendingVerification(false);
     }
   };
 
@@ -53,20 +34,9 @@ export default function HomePage() {
             verify your email to access all features of your account.
           </p>
 
-          <Button
-            className="mt-4"
-            size="sm"
-            onClick={handleResendVerification}
-            disabled={sendingVerification}
-          >
-            {sendingVerification ? "Sending..." : "Resend Verification Email"}
-          </Button>
+         
 
-          {verificationMessage && (
-            <p className="mt-3 text-sm text-yellow-800">
-              {verificationMessage}
-            </p>
-          )}
+  
         </div>
       )}
       <div className="rounded-lg border p-6 shadow-sm">

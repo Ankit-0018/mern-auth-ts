@@ -1,6 +1,6 @@
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   registerSchema,
   type RegisterFormData,
@@ -16,8 +16,11 @@ import {
   FieldError,
 } from "@/components/ui/field";
 import { api } from "@/lib/axios";
+import { useAuth } from "@/context/AuthContext";
 
 export default function RegisterPage() {
+  const { setUser } = useAuth();
+  const navigate = useNavigate();
   const {
     control,
     handleSubmit,
@@ -33,11 +36,14 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      await api.post("/auth/register", {
+      const response = await api.post("/auth/register", {
         email: data.email,
         password: data.password,
         confirmPassword: data.confirmPassword,
       });
+      setUser(response.data.user);
+      console.log(response)
+      navigate("/home");
       toast.success("Register done.");
     } catch (error) {
       const message = axios.isAxiosError(error)

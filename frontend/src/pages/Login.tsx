@@ -5,7 +5,7 @@ import { loginSchema, type LoginFormData } from "@/lib/schemas/login.schema";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import {
   Field,
@@ -16,8 +16,11 @@ import {
 import axios from "axios";
 import toast from "react-hot-toast";
 import { api } from "@/lib/axios";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
+  const { setUser } = useAuth();
+  const navigate = useNavigate();
   const {
     control,
     handleSubmit,
@@ -32,10 +35,13 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await api.post("/auth/login", {
+      const response = await api.post("/auth/login", {
         email: data.email,
         password: data.password,
       });
+      setUser(response.data.user);
+      console.log(response.data);
+      navigate("/home");
       toast.success("Login Successfully.");
     } catch (error) {
       const message = axios.isAxiosError(error)

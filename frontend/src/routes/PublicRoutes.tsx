@@ -13,7 +13,7 @@ export default function PublicRoute() {
     allowedPaths.includes(location.pathname) || isVerificationPage;
 
   if (user && !isAllowedPage) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   return <Outlet />;
